@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using System.Diagnostics;
 
 namespace AsyncEnumerablePoC.Server.DataAccess;
 
@@ -8,19 +7,12 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<DataDbCont
 { 
     public DataDbContext CreateDbContext(string[] args)
     {
-        string curDir = Directory.GetCurrentDirectory();
-
-        var test = new ConfigurationBuilder();
-
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-            .Build(); 
+            .AddJsonFile("connectionstrings.json", optional: false, reloadOnChange: false)
+            .Build();
 
-        string connectionString = configuration.GetConnectionString("TheOnlyDatabase");
-
-        Debugger.Launch();
-
+        string connectionString = configuration.GetConnectionString(ConnectionStrings.TheOnlyDatabase)!;
         return new DataDbContext(connectionString);
     } 
 }

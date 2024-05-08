@@ -2,6 +2,9 @@ using AsyncEnumerablePoC.Server.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration
+    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+    .AddJsonFile("connectionstrings.json", optional: false, reloadOnChange: false);
 
 // Add services to the container.
 
@@ -10,7 +13,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<DataDbContext>();
+builder.Services.AddSingleton(s => new DataDbContext(
+    builder.Configuration.GetConnectionString(ConnectionStrings.TheOnlyDatabase)!));
 
 var app = builder.Build();
 

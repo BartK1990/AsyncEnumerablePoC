@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "TheOnlyDatabase": "Data Source=(local);Initial Catalog=AsyncEnumerablePoC_DB;Integrated Security=True;Pooling=False;MultipleActiveResultSets=true;Connection Timeout=10;Encrypt=False"
+  }
+}
