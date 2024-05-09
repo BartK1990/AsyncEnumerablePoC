@@ -3,9 +3,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace AsyncEnumerablePoC.Server.DataAccess;
 
-public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<DataDbContext> 
+public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ReadDataDbContext> 
 { 
-    public DataDbContext CreateDbContext(string[] args)
+    public ReadDataDbContext CreateDbContext(string[] args)
     {
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -13,6 +13,6 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<DataDbCont
             .Build();
 
         string connectionString = configuration.GetConnectionString(ConnectionStrings.TheOnlyDatabase)!;
-        return new DataDbContext(connectionString);
+        return new ReadDataDbContext(connectionString);
     } 
 }

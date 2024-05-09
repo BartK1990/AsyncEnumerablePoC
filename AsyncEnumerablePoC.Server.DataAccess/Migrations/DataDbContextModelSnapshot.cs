@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AsyncEnumerablePoC.Server.DataAccess.Migrations
 {
-    [DbContext(typeof(DataDbContext))]
+    [DbContext(typeof(ReadDataDbContext))]
     partial class DataDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -21,6 +21,38 @@ namespace AsyncEnumerablePoC.Server.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("AsyncEnumerablePoC.Server.DataAccess.Model.HistoricalComplexData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("Value1")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Value2")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Value3")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Value4")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Value5")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HistoricalComplexData");
+                });
 
             modelBuilder.Entity("AsyncEnumerablePoC.Server.DataAccess.Model.HistoricalData", b =>
                 {

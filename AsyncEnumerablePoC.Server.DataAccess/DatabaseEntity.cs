@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AsyncEnumerablePoC.Server.DataAccess;
-public abstract class DatabaseEntity
+public abstract record DatabaseEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Key]

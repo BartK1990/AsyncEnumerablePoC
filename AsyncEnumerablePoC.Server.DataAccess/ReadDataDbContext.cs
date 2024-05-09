@@ -2,11 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace AsyncEnumerablePoC.Server.DataAccess;
-public class DataDbContext : DbContext
+public class ReadDataDbContext : DbContext
 {
     private readonly string _connectionString;
 
-    public DataDbContext(string connectionString)
+    public ReadDataDbContext(string connectionString)
     {
         _connectionString = connectionString;
     }
@@ -18,6 +18,8 @@ public class DataDbContext : DbContext
 
     #nullable disable
     public DbSet<HistoricalData> HistoricalData { get; set; }
+
+    public DbSet<HistoricalComplexData> HistoricalComplexData { get; set; }
 
     #nullable enable
 }

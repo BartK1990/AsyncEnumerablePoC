@@ -1,6 +1,6 @@
 ﻿namespace AsyncEnumerablePoC.Server.DataAccess.Model;
 
-public class HistoricalData : DatabaseEntity
+public record HistoricalData : DatabaseEntity
 {
     public DateTime Timestamp { get; set; }
 
