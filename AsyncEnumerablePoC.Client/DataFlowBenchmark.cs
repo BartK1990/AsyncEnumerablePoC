@@ -1,5 +1,4 @@
-﻿using System.Net;
-using AsyncEnumerablePoC.Client.DataAccess;
+﻿using AsyncEnumerablePoC.Client.DataAccess;
 using AsyncEnumerablePoC.Client.DataAccess.Model;
 using AsyncEnumerablePoC.Client.Receivers;
 using AsyncEnumerablePoC.Server;
@@ -10,16 +9,19 @@ using Flurl;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using System.Net;
 
 namespace AsyncEnumerablePoC.Client;
 
 [MemoryDiagnoser]
 public class DataFlowBenchmark
 {
+    public const int BatchSize = 10_000;
+
     private readonly SaveDataDbContext _saveDataDbContext;
     private readonly HistoricalDataProvider _historicalDataProvider;
     
-    public HttpClient HttpClient { get; private set; }
+    public HttpClient HttpClient { get; }
 
     public DataFlowBenchmark()
     {
@@ -36,8 +38,8 @@ public class DataFlowBenchmark
         _historicalDataProvider = new HistoricalDataProvider(readDataDbContext);
     }
 
-    ////[Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
-    [Params(86400)]
+    [Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
+    //[Params(86400)]
     public int Samples;
 
     [GlobalSetup]
@@ -56,7 +58,6 @@ public class DataFlowBenchmark
     }
 
     [Benchmark]
-
     public async Task<double> DbReadOnlyAsyncEnumerable()
     {
         var results = _historicalDataProvider.GetHistoricalData().AsAsyncEnumerable();
@@ -70,7 +71,6 @@ public class DataFlowBenchmark
     }
 
     [Benchmark]
-
     public async Task<double> DbReadOnlyCollection()
     {
         var results = await _historicalDataProvider.GetHistoricalData().ToArrayAsync();
@@ -84,7 +84,6 @@ public class DataFlowBenchmark
     }
 
     [Benchmark]
-
     public async Task<double> DbReadTransformedTwiceAsyncEnumerable()
     {
         var results = _historicalDataProvider.GetHistoricalDataTransformedTwiceAsyncEnumerable();
@@ -98,7 +97,6 @@ public class DataFlowBenchmark
     }
 
     [Benchmark]
-
     public async Task<double> DbReadTransformedTwiceCollection()
     {
         var results = await _historicalDataProvider.GetHistoricalDataTransformedTwiceCollection();
@@ -113,7 +111,6 @@ public class DataFlowBenchmark
 
 
     [Benchmark]
-
     public async Task<double> GetDataAsyncEnum()
     {
         var results = AsyncEnumerableReceiver.RequestData<HistoricalData>(
@@ -130,7 +127,6 @@ public class DataFlowBenchmark
     }
 
     [Benchmark]
-
     public async Task<double> GetDataCollection()
     {
         var results = await CollectionReceiver.RequestData<HistoricalData>(
@@ -153,16 +149,34 @@ public class DataFlowBenchmark
             HttpClient,
             Url.Combine("HistoricalData", "GetTransformedOnceDataAE"));
 
-        IAsyncEnumerable<HistoricalTransformedData> transformed = Transform(results);
+        IAsyncEnumerable<HistoricalTransformedData> transformed = Transform1(results, -7);
 
         await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(await transformed.ToArrayAsync());
+    }
 
-        async IAsyncEnumerable<HistoricalTransformedData> Transform(IAsyncEnumerable<HistoricalData> dataSets)
+    [Benchmark]
+    public async Task GetDataTransformOnceAndSaveBatchesAsyncEnum()
+    {
+        IAsyncEnumerable<HistoricalData> results = AsyncEnumerableReceiver.RequestData<HistoricalData>(
+            HttpClient,
+            Url.Combine("HistoricalData", "GetTransformedOnceDataAE"));
+
+        IAsyncEnumerable<HistoricalTransformedData> transformed = Transform1(results, -7);
+
+        var batch = new List<HistoricalTransformedData>();
+        await foreach (HistoricalTransformedData data in transformed)
         {
-            await foreach (var data in dataSets)
+            batch.Add(data);
+            if (batch.Count >= BatchSize)
             {
-                yield return new HistoricalTransformedData(data.Timestamp, data.Value - 7);
+                await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(batch);
+                batch.Clear();
             }
+        }
+
+        if (batch.Any())
+        {
+            await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(batch);
         }
     }
 
@@ -189,21 +203,32 @@ public class DataFlowBenchmark
         IAsyncEnumerable<HistoricalTransformedData> transformed2 = Transform2(transformed1, 3);
 
         await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(await transformed2.ToArrayAsync());
+    }
 
-        async IAsyncEnumerable<HistoricalTransformedData> Transform1(IAsyncEnumerable<HistoricalData> dataSets, int val)
+    [Benchmark]
+    public async Task GetDataTransformTwiceAndSaveBatchesAsyncEnum()
+    {
+        IAsyncEnumerable<HistoricalData> results = AsyncEnumerableReceiver.RequestData<HistoricalData>(
+            HttpClient,
+            Url.Combine("HistoricalData", "GetTransformedOnceDataAE"));
+
+        IAsyncEnumerable<HistoricalTransformedData> transformed1 = Transform1(results, -7);
+        IAsyncEnumerable<HistoricalTransformedData> transformed2 = Transform2(transformed1, 3);
+
+        var batch = new List<HistoricalTransformedData>();
+        await foreach (HistoricalTransformedData data in transformed2)
         {
-            await foreach (var data in dataSets)
+            batch.Add(data);
+            if (batch.Count >= BatchSize)
             {
-                yield return new HistoricalTransformedData(data.Timestamp, data.Value + val);
+                await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(batch);
+                batch.Clear();
             }
         }
 
-        async IAsyncEnumerable<HistoricalTransformedData> Transform2(IAsyncEnumerable<HistoricalTransformedData> dataSets, int val)
+        if (batch.Any())
         {
-            await foreach (var data in dataSets)
-            {
-                yield return data with { Value = data.Value + val };
-            }
+            await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(batch);
         }
     }
 
@@ -233,21 +258,33 @@ public class DataFlowBenchmark
         IAsyncEnumerable<HistoricalTransformedData> transformed3 = Transform2(transformed2, 4);
 
         await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(await transformed3.ToArrayAsync());
+    }
 
-        async IAsyncEnumerable<HistoricalTransformedData> Transform1(IAsyncEnumerable<HistoricalData> dataSets, int val)
+    [Benchmark]
+    public async Task GetDataTransformThreeAndSaveBatchesAsyncEnum()
+    {
+        IAsyncEnumerable<HistoricalData> results = AsyncEnumerableReceiver.RequestData<HistoricalData>(
+            HttpClient,
+            Url.Combine("HistoricalData", "GetTransformedOnceDataAE"));
+
+        IAsyncEnumerable<HistoricalTransformedData> transformed1 = Transform1(results, -7);
+        IAsyncEnumerable<HistoricalTransformedData> transformed2 = Transform2(transformed1, 3);
+        IAsyncEnumerable<HistoricalTransformedData> transformed3 = Transform2(transformed2, 4);
+
+        var batch = new List<HistoricalTransformedData>();
+        await foreach (HistoricalTransformedData data in transformed3)
         {
-            await foreach (var data in dataSets)
+            batch.Add(data);
+            if (batch.Count >= BatchSize)
             {
-                yield return new HistoricalTransformedData(data.Timestamp, data.Value + val);
+                await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(batch);
+                batch.Clear();
             }
         }
 
-        async IAsyncEnumerable<HistoricalTransformedData> Transform2(IAsyncEnumerable<HistoricalTransformedData> dataSets, int val)
+        if (batch.Any())
         {
-            await foreach (var data in dataSets)
-            {
-                yield return data with { Value = data.Value + val };
-            }
+            await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(batch);
         }
     }
 
@@ -263,6 +300,22 @@ public class DataFlowBenchmark
         HistoricalTransformedData[] data3 = data2.Select(d => d with { Value = d.Value + 3 }).ToArray();
 
         await _saveDataDbContext.DbSet.HistoricalTransformedDataSets.InsertManyAsync(data3);
+    }
+
+    private static async IAsyncEnumerable<HistoricalTransformedData> Transform1(IAsyncEnumerable<HistoricalData> dataSets, int val)
+    {
+        await foreach (var data in dataSets)
+        {
+            yield return new HistoricalTransformedData(data.Timestamp, data.Value + val);
+        }
+    }
+
+    private static async IAsyncEnumerable<HistoricalTransformedData> Transform2(IAsyncEnumerable<HistoricalTransformedData> dataSets, int val)
+    {
+        await foreach (var data in dataSets)
+        {
+            yield return data with { Value = data.Value + val };
+        }
     }
 
     private static async Task CheckServerConnection()
