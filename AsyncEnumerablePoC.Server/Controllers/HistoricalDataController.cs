@@ -57,6 +57,21 @@ public class HistoricalDataController : ControllerBase
         return Ok(await _historicalDataProvider.GetHistoricalDataTransformedOnceCollection());
     }
 
+    [HttpGet("GetComplexTransformedOnceDataAE")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public IAsyncEnumerable<object> GetHistoricalComplexTransformedOnceDataDataAsyncEnumerable()
+    {
+        return _historicalDataProvider.GetHistoricalComplexDataTransformedOnceAsyncEnumerable();
+    }
+
+    [HttpGet("GetComplexTransformedOnceDataC")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetHistoricalComplexTransformedOnceDataDataCollection()
+    {
+        return Ok(await _historicalDataProvider.GetHistoricalComplexDataTransformedOnceCollection());
+    }
+
     [HttpPut("InsertData/{dataCount:int}")]
     public ActionResult InsertHistoricalData(int dataCount)
     {

@@ -1,12 +1,14 @@
 ﻿using AsyncEnumerablePoC.Client;
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
 
-BenchmarkRunner.Run<DataFlowBenchmark>();
+var config = DefaultConfig.Instance
+    .WithOption(ConfigOptions.JoinSummary, true);
 
-//Console.WriteLine("Start");
-//await Task.Delay(5000);
-
-//var client = new DataFlowBenchmark();
-//await client.GetDataTransformOnceAndSaveCollection();
-
-//Console.WriteLine("End");
+//BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadOnly>(config);
+//BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadTransformedTwice>(config);
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetData>(config);
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformOnceAndSave>(config);
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformTwiceAndSave>(config);
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformThreeAndSave>(config);
+BenchmarkRunner.Run<HistoricalDataComplexBenchmark>(config);

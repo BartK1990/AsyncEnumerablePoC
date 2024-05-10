@@ -20,6 +20,13 @@ public class HistoricalDataProvider
         return histData;
     }
 
+    public IQueryable<HistoricalData> GetHistoricalComplexData()
+    {
+        var histData = _dbContext.HistoricalData
+            .AsNoTracking();
+        return histData;
+    }
+
     public async IAsyncEnumerable<HistoricalData> GetHistoricalDataTransformedOnceAsyncEnumerable()
     {
         await foreach (HistoricalData data in GetHistoricalData().AsAsyncEnumerable())
@@ -31,6 +38,21 @@ public class HistoricalDataProvider
     public async Task<IReadOnlyCollection<HistoricalData>> GetHistoricalDataTransformedOnceCollection()
     {
         var coll = (await GetHistoricalData().ToArrayAsync())
+            .Select(d => d with { Value =+ 1 });
+        return coll.ToArray();
+    }
+
+    public async IAsyncEnumerable<HistoricalData> GetHistoricalComplexDataTransformedOnceAsyncEnumerable()
+    {
+        await foreach (HistoricalData data in GetHistoricalComplexData().AsAsyncEnumerable())
+        {
+            yield return data with { Value =+ 1 };
+        }
+    }
+
+    public async Task<IReadOnlyCollection<HistoricalData>> GetHistoricalComplexDataTransformedOnceCollection()
+    {
+        var coll = (await GetHistoricalComplexData().ToArrayAsync())
             .Select(d => d with { Value =+ 1 });
         return coll.ToArray();
     }
