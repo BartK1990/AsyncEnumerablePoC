@@ -7,7 +7,7 @@ using Flurl;
 namespace AsyncEnumerablePoC.Client;
 public class HistoricalDataBenchmarkGetDataTransformOnceAndSave : HistoricalDataBenchmark
 {
-    [Benchmark(Baseline = true)]
+    [Benchmark(Baseline = true), BenchmarkCategory("GetDataTransformOnceAndSave")]
     public async Task GetDataTransformOnceAndSaveCollection()
     {
         var results = await CollectionReceiver.RequestData<HistoricalData>(
@@ -19,7 +19,7 @@ public class HistoricalDataBenchmarkGetDataTransformOnceAndSave : HistoricalData
         await MongoDataSet.InsertManyAsync(data);
     }
 
-    [Benchmark]
+    [Benchmark, BenchmarkCategory("GetDataTransformOnceAndSave")]
     public async Task GetDataTransformOnceAndSaveAsyncEnum()
     {
         IAsyncEnumerable<HistoricalData> results = AsyncEnumerableReceiver.RequestData<HistoricalData>(
@@ -31,7 +31,7 @@ public class HistoricalDataBenchmarkGetDataTransformOnceAndSave : HistoricalData
         await MongoDataSet.InsertManyAsync(await transformed.ToArrayAsync());
     }
 
-    [Benchmark]
+    [Benchmark, BenchmarkCategory("GetDataTransformOnceAndSave")]
     public async Task GetDataTransformOnceAndSaveBatchesAsyncEnum()
     {
         IAsyncEnumerable<HistoricalData> results = AsyncEnumerableReceiver.RequestData<HistoricalData>(

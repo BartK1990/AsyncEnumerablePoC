@@ -13,7 +13,7 @@ public class HistoricalDataComplexBenchmark : HistoricalDataBenchmark
     public new IMongoCollection<HistoricalTransformedComplexData> MongoDataSet =>
         SaveDataDbContext.DbSet.HistoricalTransformedComplexDataSets;
 
-    [Benchmark(Baseline = true)]
+    [Benchmark(Baseline = true), BenchmarkCategory("GetComplexDataTransformThreeAndSave")]
     public async Task GetDataTransformThreeAndSaveCollection()
     {
         var results = await CollectionReceiver.RequestData<HistoricalComplexData>(
@@ -27,7 +27,7 @@ public class HistoricalDataComplexBenchmark : HistoricalDataBenchmark
         await MongoDataSet.InsertManyAsync(data3);
     }
 
-    [Benchmark]
+    [Benchmark, BenchmarkCategory("GetComplexDataTransformThreeAndSave")]
     public async Task GetDataTransformThreeAndSaveAsyncEnum()
     {
         IAsyncEnumerable<HistoricalComplexData> results = AsyncEnumerableReceiver.RequestData<HistoricalComplexData>(
@@ -41,7 +41,7 @@ public class HistoricalDataComplexBenchmark : HistoricalDataBenchmark
         await MongoDataSet.InsertManyAsync(await transformed3.ToArrayAsync());
     }
 
-    [Benchmark]
+    [Benchmark, BenchmarkCategory("GetComplexDataTransformThreeAndSave")]
     public async Task GetDataTransformThreeAndSaveBatchesAsyncEnum()
     {
         IAsyncEnumerable<HistoricalComplexData> results = AsyncEnumerableReceiver.RequestData<HistoricalComplexData>(

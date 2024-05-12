@@ -3,7 +3,7 @@
 namespace AsyncEnumerablePoC.Client;
 public class HistoricalDataBenchmarkDbReadTransformedTwice : HistoricalDataBenchmark
 {
-    [Benchmark(Baseline = true)]
+    [Benchmark(Baseline = true), BenchmarkCategory("DbReadTransformedTwice")]
     public async Task<double> DbReadTransformedTwiceCollection()
     {
         var results = await HistoricalDataProvider.GetHistoricalDataTransformedTwiceCollection();
@@ -16,7 +16,7 @@ public class HistoricalDataBenchmarkDbReadTransformedTwice : HistoricalDataBench
         return a;
     }
 
-    [Benchmark]
+    [Benchmark, BenchmarkCategory("DbReadTransformedTwice")]
     public async Task<double> DbReadTransformedTwiceAsyncEnumerable()
     {
         var results = HistoricalDataProvider.GetHistoricalDataTransformedTwiceAsyncEnumerable();

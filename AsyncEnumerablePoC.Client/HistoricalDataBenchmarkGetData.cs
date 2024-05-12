@@ -6,7 +6,7 @@ using Flurl;
 namespace AsyncEnumerablePoC.Client;
 public class HistoricalDataBenchmarkGetData : HistoricalDataBenchmark
 {
-    [Benchmark(Baseline = true)]
+    [Benchmark(Baseline = true), BenchmarkCategory("GetData")]
     public async Task<double> GetDataCollection()
     {
         var results = await CollectionReceiver.RequestData<HistoricalData>(
@@ -22,7 +22,7 @@ public class HistoricalDataBenchmarkGetData : HistoricalDataBenchmark
         return a;
     }
 
-    [Benchmark]
+    [Benchmark, BenchmarkCategory("GetData")]
     public async Task<double> GetDataAsyncEnum()
     {
         var results = AsyncEnumerableReceiver.RequestData<HistoricalData>(

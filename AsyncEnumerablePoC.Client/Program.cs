@@ -5,10 +5,14 @@ using BenchmarkDotNet.Running;
 var config = DefaultConfig.Instance
     .WithOption(ConfigOptions.JoinSummary, true);
 
-BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadOnly>(config);
-BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadTransformedTwice>(config);
-BenchmarkRunner.Run<HistoricalDataBenchmarkGetData>(config);
-BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformOnceAndSave>(config);
-BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformTwiceAndSave>(config);
-BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformThreeAndSave>(config);
-BenchmarkRunner.Run<HistoricalDataComplexBenchmark>(config);
+BenchmarkRunner.Run(
+    typeof(HistoricalDataBenchmark).Assembly,
+    config);
+
+//BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadOnly>();
+//BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadTransformedTwice>();
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetData>();
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformOnceAndSave>();
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformTwiceAndSave>();
+//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformThreeAndSave>();
+//BenchmarkRunner.Run<HistoricalDataComplexBenchmark>();

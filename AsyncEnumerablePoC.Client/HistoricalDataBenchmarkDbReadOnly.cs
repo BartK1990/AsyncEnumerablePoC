@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AsyncEnumerablePoC.Client;
 public class HistoricalDataBenchmarkDbReadOnly : HistoricalDataBenchmark
 {
-    [Benchmark(Baseline = true)]
+    [Benchmark(Baseline = true), BenchmarkCategory("DbReadOnly")]
     public async Task<double> DbReadOnlyCollection()
     {
         var results = await HistoricalDataProvider.GetHistoricalData().ToArrayAsync();
@@ -17,7 +17,7 @@ public class HistoricalDataBenchmarkDbReadOnly : HistoricalDataBenchmark
         return a;
     }
 
-    [Benchmark]
+    [Benchmark, BenchmarkCategory("DbReadOnly")]
     public async Task<double> DbReadOnlyAsyncEnumerable()
     {
         var results = HistoricalDataProvider.GetHistoricalData().AsAsyncEnumerable();

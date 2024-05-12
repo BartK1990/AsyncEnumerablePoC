@@ -4,11 +4,13 @@ using AsyncEnumerablePoC.Server;
 using AsyncEnumerablePoC.Server.DataAccess;
 using AsyncEnumerablePoC.Server.DataAccess.Model;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
 namespace AsyncEnumerablePoC.Client;
 
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory), CategoriesColumn]
 [MemoryDiagnoser]
 public abstract class HistoricalDataBenchmark
 {
@@ -37,8 +39,8 @@ public abstract class HistoricalDataBenchmark
         HistoricalDataProvider = new HistoricalDataProvider(readDataDbContext);
     }
 
-    [Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
-    //[Params(144)]
+    //[Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
+    [Params(10080)]
     public int Samples;
 
     [GlobalSetup]
@@ -54,6 +56,12 @@ public abstract class HistoricalDataBenchmark
     {
         await ClearMongo();
         HttpClient.Dispose();
+    }
+
+    [IterationCleanup]
+    public void IterationCleanup()
+    {
+        ClearMongo().Wait();
     }
 
     protected static async IAsyncEnumerable<HistoricalTransformedData> MapTransformAsyncEnum(IAsyncEnumerable<HistoricalData> dataSets, double val)
