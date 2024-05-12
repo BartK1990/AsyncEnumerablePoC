@@ -7,7 +7,6 @@ using MongoDB.Driver;
 
 namespace AsyncEnumerablePoC.Client;
 
-[MemoryDiagnoser]
 public class HistoricalDataComplexBenchmark : HistoricalDataBenchmark
 {
     public new IMongoCollection<HistoricalTransformedComplexData> MongoDataSet =>
