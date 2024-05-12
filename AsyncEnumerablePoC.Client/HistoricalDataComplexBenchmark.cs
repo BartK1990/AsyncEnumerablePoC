@@ -20,7 +20,7 @@ public class HistoricalDataComplexBenchmark : HistoricalDataBenchmark
             Url.Combine("HistoricalData", "GetComplexTransformedOnceDataC"));
 
         HistoricalTransformedComplexData[] data1 = results.Select(d => Transform(Map(d), -7)).ToArray();
-        HistoricalTransformedComplexData[] data2 = data1.Select(d => Transform(d, 3)).ToArray();
+        HistoricalTransformedComplexData[] data2 = data1.Select(d => Transform(d, 123.2)).ToArray();
         HistoricalTransformedComplexData[] data3 = data2.Select(d => Transform(d, 4)).ToArray();
 
         await MongoDataSet.InsertManyAsync(data3);
