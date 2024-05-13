@@ -39,8 +39,8 @@ public abstract class HistoricalDataBenchmark
         HistoricalDataProvider = new HistoricalDataProvider(readDataDbContext);
     }
 
-    //[Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
-    [Params(10080)]
+    [Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
+    //[Params(144, 10080, 86400)]
     public int Samples;
 
     [GlobalSetup]
@@ -89,9 +89,50 @@ public abstract class HistoricalDataBenchmark
 
     protected static HistoricalTransformedData Transform(HistoricalTransformedData data, double val)
     {
+        AdditionalEffort();
         return data with
         {
             Value =+ val,
+        };
+    }
+
+    protected static async IAsyncEnumerable<HistoricalTransformedComplexData> MapTransform(IAsyncEnumerable<HistoricalComplexData> dataSets, double val)
+    {
+        await foreach (var data in dataSets)
+        {
+            yield return Transform(Map(data), val);
+        }
+    }
+
+    protected static async IAsyncEnumerable<HistoricalTransformedComplexData> Transform(IAsyncEnumerable<HistoricalTransformedComplexData> dataSets, double val)
+    {
+        AdditionalEffort();
+        await foreach (var data in dataSets)
+        {
+            yield return Transform(data, val);
+        }
+    }
+
+    protected static HistoricalTransformedComplexData Map(HistoricalComplexData data)
+    {
+        return new HistoricalTransformedComplexData(
+            data.Timestamp,
+            data.Value1,
+            data.Value2,
+            data.Value3,
+            data.Value4,
+            data.Value5);
+    }
+
+    protected static HistoricalTransformedComplexData Transform(HistoricalTransformedComplexData data, double val)
+    {
+        return data with
+        {
+            Value1 =+ val,
+            Value2 =+ val,
+            Value3 =+ val,
+            Value4 =+ val,
+            Value5 =+ val,
         };
     }
 
@@ -117,5 +158,9 @@ public abstract class HistoricalDataBenchmark
     {
         await MongoDataSet.DeleteManyAsync(
             Builders<HistoricalTransformedData>.Filter.Empty); // Delete all
+    }
+
+    private static void AdditionalEffort()
+    {
     }
 }

@@ -7,7 +7,7 @@ using MongoDB.Driver;
 
 namespace AsyncEnumerablePoC.Client;
 
-public class HistoricalDataComplexBenchmark : HistoricalDataBenchmark
+public class HistoricalDataComplexBenchmarkGetDataTransformThreeAndSave : HistoricalDataBenchmark
 {
     public new IMongoCollection<HistoricalTransformedComplexData> MongoDataSet =>
         SaveDataDbContext.DbSet.HistoricalTransformedComplexDataSets;
@@ -52,45 +52,6 @@ public class HistoricalDataComplexBenchmark : HistoricalDataBenchmark
         IAsyncEnumerable<HistoricalTransformedComplexData> transformed3 = Transform(transformed2, 4);
 
         await BatchInsert(transformed3, MongoDataSet);
-    }
-
-    private static async IAsyncEnumerable<HistoricalTransformedComplexData> MapTransform(IAsyncEnumerable<HistoricalComplexData> dataSets, double val)
-    {
-        await foreach (var data in dataSets)
-        {
-            yield return Transform(Map(data), val);
-        }
-    }
-
-    private static async IAsyncEnumerable<HistoricalTransformedComplexData> Transform(IAsyncEnumerable<HistoricalTransformedComplexData> dataSets, double val)
-    {
-        await foreach (var data in dataSets)
-        {
-            yield return Transform(data, val);
-        }
-    }
-
-    private static HistoricalTransformedComplexData Map(HistoricalComplexData data)
-    {
-        return new HistoricalTransformedComplexData(
-            data.Timestamp,
-            data.Value1,
-            data.Value2,
-            data.Value3,
-            data.Value4,
-            data.Value5);
-    }
-
-    private static HistoricalTransformedComplexData Transform(HistoricalTransformedComplexData data, double val)
-    {
-        return data with
-        {
-            Value1 =+ val,
-            Value2 =+ val,
-            Value3 =+ val,
-            Value4 =+ val,
-            Value5 =+ val,
-        };
     }
 
     protected override async Task ClearMongo()
