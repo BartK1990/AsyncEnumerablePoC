@@ -37,9 +37,46 @@ public class HistoricalDataController : ControllerBase
     [HttpGet("GetDataC")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalData>), StatusCodes.Status200OK)]
-    public ActionResult GetHistoricalDataCollection()
+    public async Task<ActionResult> GetHistoricalDataCollection()
     {
-        return Ok(_historicalDataProvider.GetHistoricalData().ToArray());
+        return Ok(await _historicalDataProvider.GetHistoricalData().ToArrayAsync());
+    }
+
+    [HttpPost("GetDataC-Batch")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalData>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetHistoricalDataCollectionBatch([FromBody] GetDataBatchRequest request)
+    {
+        return Ok(await _historicalDataProvider.GetHistoricalData()
+            .Skip(request.BatchCount * request.BatchSize)
+            .Take(request.BatchSize)
+            .ToArrayAsync());
+    }
+
+    [HttpGet("GetComplexDataAE")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public IAsyncEnumerable<object> GetHistoricalComplexDataAsyncEnumerable()
+    {
+        return _historicalDataProvider.GetHistoricalComplexData().AsAsyncEnumerable();
+    }
+
+    [HttpGet("GetComplexDataC")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetHistoricalComplexDataCollection()
+    {
+        return Ok(await _historicalDataProvider.GetHistoricalComplexData().ToArrayAsync());
+    }
+
+    [HttpPost("GetComplexDataC-Batch")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetHistoricalComplexDataCollectionBatch([FromBody] GetDataBatchRequest request)
+    {
+        return Ok(await _historicalDataProvider.GetHistoricalComplexData()
+            .Skip(request.BatchCount * request.BatchSize)
+            .Take(request.BatchSize)
+            .ToArrayAsync());
     }
 
     [HttpGet("GetTransformedOnceDataAE")]
@@ -61,7 +98,9 @@ public class HistoricalDataController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
     public IAsyncEnumerable<object> GetHistoricalComplexTransformedOnceDataDataAsyncEnumerable()
     {
-        return _historicalDataProvider.GetHistoricalComplexDataTransformedOnceAsyncEnumerable();
+        _logger.LogWarning("AsyncE");
+        var result = _historicalDataProvider.GetHistoricalComplexDataTransformedOnceAsyncEnumerable();
+        return result;
     }
 
     [HttpGet("GetComplexTransformedOnceDataC")]
@@ -69,7 +108,29 @@ public class HistoricalDataController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
     public async Task<ActionResult> GetHistoricalComplexTransformedOnceDataDataCollection()
     {
-        return Ok(await _historicalDataProvider.GetHistoricalComplexDataTransformedOnceCollection());
+        return Ok(await _historicalDataProvider.GetHistoricalComplexDataCollection());
+    }
+
+    [HttpGet("GC-GetDataAE")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public IAsyncEnumerable<object> GcGetDataAsyncEnumerable()
+    {
+        _logger.LogWarning("AsyncE");
+        var result = _historicalDataProvider.GetHistoricalComplexDataTransformedOnceAsyncEnumerable();
+        return result;
+    }
+
+    [HttpGet("GC-GetDataC")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> GcGetDataCollection()
+    {
+        _logger.LogWarning("Collection");
+        var memory = GC.GetTotalMemory(true);
+        _logger.LogWarning("Memory C before: {Memory}", memory);
+        var result = await _historicalDataProvider.GetHistoricalComplexDataCollection();
+        _logger.LogError("Memory C offset: {Memory}", _historicalDataProvider.Memory - memory);
+        return Ok(result);
     }
 
     [HttpPut("InsertData/{dataCount:int}")]

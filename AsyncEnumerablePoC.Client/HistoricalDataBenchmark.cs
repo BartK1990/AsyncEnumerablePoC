@@ -14,7 +14,7 @@ namespace AsyncEnumerablePoC.Client;
 [MemoryDiagnoser]
 public abstract class HistoricalDataBenchmark
 {
-    public const int BatchSize = 10_000;
+    public const int BatchSize = 1000;
 
     protected readonly SaveDataDbContext SaveDataDbContext;
     protected readonly HistoricalDataProvider HistoricalDataProvider;
@@ -36,11 +36,12 @@ public abstract class HistoricalDataBenchmark
 
         var readDataDbContext = new ReadDataDbContext(configuration.GetConnectionString(ConnectionStrings.TheOnlyDatabase)!);
         SaveDataDbContext = new SaveDataDbContext(ConnectionHelper.MongoDbLocalhost, ConnectionHelper.MongoDbName);
-        HistoricalDataProvider = new HistoricalDataProvider(readDataDbContext);
+        HistoricalDataProvider = new HistoricalDataProvider(readDataDbContext, null);
     }
 
-    [Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
-    //[Params(144, 10080, 86400)]
+    //[Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
+    //[Params(1000, 10000, 86000, 388000)] // Check the limit of Large object Heap - 85 000 bytes
+    [Params(1000)]
     public int Samples;
 
     [GlobalSetup]
@@ -96,12 +97,9 @@ public abstract class HistoricalDataBenchmark
         };
     }
 
-    protected static async IAsyncEnumerable<HistoricalTransformedComplexData> MapTransform(IAsyncEnumerable<HistoricalComplexData> dataSets, double val)
+    protected static IAsyncEnumerable<HistoricalTransformedComplexData> MapTransform(IAsyncEnumerable<HistoricalComplexData> dataSets, double val)
     {
-        await foreach (var data in dataSets)
-        {
-            yield return Transform(Map(data), val);
-        }
+        return dataSets.Select(data => Transform(Map(data), val));
     }
 
     protected static async IAsyncEnumerable<HistoricalTransformedComplexData> Transform(IAsyncEnumerable<HistoricalTransformedComplexData> dataSets, double val)

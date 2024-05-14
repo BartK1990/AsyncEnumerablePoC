@@ -9,10 +9,15 @@ BenchmarkRunner.Run(
     typeof(HistoricalDataBenchmark).Assembly,
     config);
 
-//BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadOnly>();
-//BenchmarkRunner.Run<HistoricalDataBenchmarkDbReadTransformedTwice>();
-//BenchmarkRunner.Run<HistoricalDataBenchmarkGetData>();
-//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformOnceAndSave>();
-//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformTwiceAndSave>();
-//BenchmarkRunner.Run<HistoricalDataBenchmarkGetDataTransformThreeAndSave>();
-//BenchmarkRunner.Run<HistoricalDataComplexBenchmark>();
+//Console.WriteLine("Start ...");
+//var testClient = new GetComplexDataAndSave { Samples = 5000 };
+//await Task.Delay(2000);
+//Console.WriteLine("Feeding ...");
+//await ConnectionHelper.FeedData(testClient.HttpClient, testClient.Samples);
+//Console.WriteLine("Test 1 ...");
+//await testClient.GetDataTransformThreeAndSaveBatchesCollection();
+//Console.WriteLine("Test 2 ...");
+//await testClient.GetDataTransformThreeAndSaveBatchesAsyncEnum();
+
+//Console.WriteLine("End ...");
+//Console.ReadKey();

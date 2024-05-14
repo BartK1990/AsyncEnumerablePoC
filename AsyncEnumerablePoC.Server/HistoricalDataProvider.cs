@@ -7,10 +7,14 @@ namespace AsyncEnumerablePoC.Server;
 public class HistoricalDataProvider
 {
     private readonly ReadDataDbContext _dbContext;
+    private readonly ILogger<ReadDataDbContext> _logger;
 
-    public HistoricalDataProvider(ReadDataDbContext dbContext)
+    public long Memory { get; set; }
+
+    public HistoricalDataProvider(ReadDataDbContext dbContext, ILogger<ReadDataDbContext> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public IQueryable<HistoricalData> GetHistoricalData()
@@ -20,11 +24,18 @@ public class HistoricalDataProvider
         return histData;
     }
 
-    public IQueryable<HistoricalData> GetHistoricalComplexData()
+    public IQueryable<HistoricalComplexData> GetHistoricalComplexData()
     {
-        var histData = _dbContext.HistoricalData
+        var histData = _dbContext.HistoricalComplexData
             .AsNoTracking();
         return histData;
+    }
+
+    public async Task<IReadOnlyCollection<HistoricalData>> GetHistoricalDataTransformedOnceCollection()
+    {
+        var coll = (await GetHistoricalData().ToArrayAsync())
+            .Select(d => d with { Value =+ 1 });
+        return coll.ToArray();
     }
 
     public async IAsyncEnumerable<HistoricalData> GetHistoricalDataTransformedOnceAsyncEnumerable()
@@ -35,40 +46,58 @@ public class HistoricalDataProvider
         }
     }
 
-    public async Task<IReadOnlyCollection<HistoricalData>> GetHistoricalDataTransformedOnceCollection()
+    public async Task<IReadOnlyCollection<HistoricalComplexData>> GetHistoricalComplexDataCollection()
     {
-        var coll = (await GetHistoricalData().ToArrayAsync())
-            .Select(d => d with { Value =+ 1 });
-        return coll.ToArray();
+        return await GetHistoricalComplexData().ToArrayAsync();
     }
 
-    public async IAsyncEnumerable<HistoricalData> GetHistoricalComplexDataTransformedOnceAsyncEnumerable()
+    public IAsyncEnumerable<HistoricalComplexData> GetHistoricalDataTransformedTwiceAsyncEnumerable()
     {
-        await foreach (HistoricalData data in GetHistoricalComplexData().AsAsyncEnumerable())
+        return GetHistoricalComplexData().AsAsyncEnumerable();
+    }
+
+    public async IAsyncEnumerable<HistoricalComplexData> GetHistoricalComplexDataTransformedOnceAsyncEnumerable()
+    {
+        await foreach (HistoricalComplexData data in GetHistoricalDataTransformedTwiceAsyncEnumerable())
         {
-            yield return data with { Value =+ 1 };
+            yield return data with 
+            { 
+                Value1 = +1 ,
+                Value2 = +1 ,
+                Value3 = +1 ,
+                Value4 = +1 ,
+                Value5 = +1 , 
+            };
         }
     }
 
-    public async Task<IReadOnlyCollection<HistoricalData>> GetHistoricalComplexDataTransformedOnceCollection()
+    public async IAsyncEnumerable<HistoricalData> GcGetDataAsyncEnumerable()
     {
-        var coll = (await GetHistoricalComplexData().ToArrayAsync())
-            .Select(d => d with { Value =+ 1 });
-        return coll.ToArray();
-    }
+        Memory = 0;
+        var memory = GC.GetTotalMemory(true);
+        _logger.LogWarning("Memory before: {Memory}", memory);
 
-    public async IAsyncEnumerable<HistoricalData> GetHistoricalDataTransformedTwiceAsyncEnumerable()
-    {
-        await foreach (HistoricalData data in GetHistoricalDataTransformedOnceAsyncEnumerable())
+        IAsyncEnumerator<HistoricalData>? enumerator = GetHistoricalData().AsAsyncEnumerable().GetAsyncEnumerator();
+        try
         {
-            yield return data with { Value =+ 2 };
+            while (await enumerator.MoveNextAsync())
+            {
+                var currentMemory = GC.GetTotalMemory(true);
+                if (Memory < currentMemory)
+                {
+                    Memory = currentMemory;
+                    _logger.LogWarning("Memory AE offset: {Memory}", Memory - memory);
+                }
+                yield return enumerator.Current with { Value =+ 1 };
+            }
         }
-    }
+        finally { 
+            if (enumerator is not null)
+            {
+                await enumerator.DisposeAsync();
+            }
 
-    public async Task<IReadOnlyCollection<HistoricalData>> GetHistoricalDataTransformedTwiceCollection()
-    {
-        var coll = (await GetHistoricalDataTransformedOnceCollection())
-            .Select(d => d with { Value =+ 2 });
-        return coll.ToArray();
+            _logger.LogError("Memory AE offset: {Memory}", Memory - memory);
+        }
     }
 }
