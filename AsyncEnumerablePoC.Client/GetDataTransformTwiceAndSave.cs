@@ -1,10 +1,8 @@
-﻿using AsyncEnumerablePoC.Client.DataAccess.Model;
-using AsyncEnumerablePoC.Client.Receivers;
+﻿using AsyncEnumerablePoC.Client.Receivers;
 using AsyncEnumerablePoC.Server;
 using AsyncEnumerablePoC.Server.DataAccess.Model;
 using BenchmarkDotNet.Attributes;
 using Flurl;
-using MongoDB.Driver;
 
 namespace AsyncEnumerablePoC.Client;
 
