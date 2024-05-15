@@ -6,10 +6,10 @@ using Flurl;
 
 namespace AsyncEnumerablePoC.Client;
 
-public class GetDataAndSave : HistoricalDataBenchmark
+public class Get1DataAndSave : HistoricalDataBenchmark
 {
-    [Benchmark(Baseline = true), BenchmarkCategory("GetDataMapAndSave")]
-    public async Task GetDataAndSaveBatchesCollection()
+    [Benchmark(Baseline = true), BenchmarkCategory(nameof(Get1DataAndSave))]
+    public async Task GetBatchesCollection()
     {
         int count = Samples / BatchSize;
         for (int i = 0; i < count; i++)
@@ -23,8 +23,8 @@ public class GetDataAndSave : HistoricalDataBenchmark
         }
     }
 
-    [Benchmark, BenchmarkCategory("GetDataMapAndSave")]
-    public async Task GetDataAndSaveBatchesAsyncEnum()
+    [Benchmark, BenchmarkCategory(nameof(Get1DataAndSave))]
+    public async Task GetAsyncEnum()
     {
         IAsyncEnumerable<HistoricalData> results = AsyncEnumerableReceiver.PostData<HistoricalData>(
             HttpClient,

@@ -7,10 +7,10 @@ using Flurl;
 
 namespace AsyncEnumerablePoC.Client;
 
-public class GetComplexDataSqueezeAndSave : HistoricalDataBenchmark
+public class Get3ComplexDataSqueezeAndSave : HistoricalDataBenchmark
 {
-    [Benchmark(Baseline = true), BenchmarkCategory("GetComplexDataSqueezeAndSave")]
-    public async Task GetComplexDataSqueezeAndSaveBatchesCollection()
+    [Benchmark(Baseline = true), BenchmarkCategory(nameof(Get3ComplexDataSqueezeAndSave))]
+    public async Task GetBatchesCollection()
     {
         int count = Samples / BatchSize;
         for (int i = 0; i < count; i++)
@@ -29,8 +29,8 @@ public class GetComplexDataSqueezeAndSave : HistoricalDataBenchmark
         }
     }
 
-    [Benchmark, BenchmarkCategory("GetComplexDataSqueezeAndSave")]
-    public async Task GetComplexDataSqueezeAndSaveBatchesAsyncEnum()
+    [Benchmark, BenchmarkCategory(nameof(Get3ComplexDataSqueezeAndSave))]
+    public async Task GetAsyncEnum()
     {
         IAsyncEnumerable<HistoricalComplexData> results = AsyncEnumerableReceiver.PostData<HistoricalComplexData>(
             HttpClient,
