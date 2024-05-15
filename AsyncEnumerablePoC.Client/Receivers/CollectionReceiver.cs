@@ -6,6 +6,8 @@ using System.Net.Http.Json;
 namespace AsyncEnumerablePoC.Client.Receivers;
 public static class CollectionReceiver
 {
+    public static int DefaultBufferSize = 128;
+
     public static async Task<IReadOnlyCollection<T>> RequestData<T>(HttpClient httpClient, string subUrl)
     {
         using HttpResponseMessage response = await httpClient.GetAsync(
@@ -22,7 +24,7 @@ public static class CollectionReceiver
             new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-                DefaultBufferSize = 128
+                DefaultBufferSize = DefaultBufferSize
             });
 
         return dataRows;
@@ -47,7 +49,7 @@ public static class CollectionReceiver
             new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-                DefaultBufferSize = 128
+                DefaultBufferSize = DefaultBufferSize
             });
 
         return dataRows;

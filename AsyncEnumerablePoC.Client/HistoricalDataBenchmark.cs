@@ -1,5 +1,6 @@
 ﻿using AsyncEnumerablePoC.Client.DataAccess;
 using AsyncEnumerablePoC.Client.DataAccess.Model;
+using AsyncEnumerablePoC.Client.Receivers;
 using AsyncEnumerablePoC.Server;
 using AsyncEnumerablePoC.Server.DataAccess;
 using AsyncEnumerablePoC.Server.DataAccess.Model;
@@ -40,13 +41,19 @@ public abstract class HistoricalDataBenchmark
     }
 
     //[Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
-    //[Params(1000, 10000, 86000, 388000)] // Check the limit of Large object Heap - 85 000 bytes
-    [Params(20000)]
+    [Params(1000, 10000, 86000, 388000)]
+    //[Params(20000)]
     public int Samples;
+
+    [Params(8, 128, 512)]
+    public int DefaultBufferSize;
 
     [GlobalSetup]
     public async Task Setup()
     {
+        AsyncEnumerableReceiver.DefaultBufferSize = DefaultBufferSize;
+        CollectionReceiver.DefaultBufferSize = DefaultBufferSize;
+
         await ConnectionHelper.CheckServerConnection(HttpClient);
         await ConnectionHelper.FeedData(HttpClient, Samples);
         await ClearMongo();
