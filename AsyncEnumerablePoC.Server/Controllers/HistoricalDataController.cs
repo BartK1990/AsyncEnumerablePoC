@@ -34,6 +34,13 @@ public class HistoricalDataController : ControllerBase
         return _historicalDataProvider.GetHistoricalData().AsAsyncEnumerable();
     }
 
+    [HttpPost("GetDataAE")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalData>), StatusCodes.Status200OK)]
+    public IAsyncEnumerable<object> GetPostHistoricalDataAsyncEnumerable([FromBody] GetDataBatchRequest request)
+    {
+        return _historicalDataProvider.GetHistoricalData().AsAsyncEnumerable();
+    }
+
     [HttpGet("GetDataC")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalData>), StatusCodes.Status200OK)]
@@ -56,6 +63,13 @@ public class HistoricalDataController : ControllerBase
     [HttpGet("GetComplexDataAE")]
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
     public IAsyncEnumerable<object> GetHistoricalComplexDataAsyncEnumerable()
+    {
+        return _historicalDataProvider.GetHistoricalComplexData().AsAsyncEnumerable();
+    }
+
+    [HttpPost("GetComplexDataAE")]
+    [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
+    public IAsyncEnumerable<object> GetPostHistoricalComplexDataAsyncEnumerable([FromBody] GetDataBatchRequest request)
     {
         return _historicalDataProvider.GetHistoricalComplexData().AsAsyncEnumerable();
     }

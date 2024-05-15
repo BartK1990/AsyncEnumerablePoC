@@ -41,7 +41,7 @@ public abstract class HistoricalDataBenchmark
 
     //[Params(144, 10080, 86400, 388800)] // 1 Unit 1 day | 10 Units 1 week | 20 Units 1 month | 40 Units 3 months
     //[Params(1000, 10000, 86000, 388000)] // Check the limit of Large object Heap - 85 000 bytes
-    [Params(1000)]
+    [Params(20000)]
     public int Samples;
 
     [GlobalSetup]

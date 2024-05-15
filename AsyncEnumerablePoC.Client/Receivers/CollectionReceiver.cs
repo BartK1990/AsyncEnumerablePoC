@@ -17,7 +17,7 @@ public static class CollectionReceiver
 
         Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-        IReadOnlyCollection<T>? dataRows = await JsonSerializer.DeserializeAsync<IReadOnlyCollection<T>>(
+        var dataRows = await JsonSerializer.DeserializeAsync<IReadOnlyCollection<T>>(
             responseStream,
             new JsonSerializerOptions
             {
@@ -42,7 +42,7 @@ public static class CollectionReceiver
 
         Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-        IReadOnlyCollection<T>? dataRows = await JsonSerializer.DeserializeAsync<IReadOnlyCollection<T>>(
+        var dataRows = await JsonSerializer.DeserializeAsync<IReadOnlyCollection<T>>(
             responseStream,
             new JsonSerializerOptions
             {

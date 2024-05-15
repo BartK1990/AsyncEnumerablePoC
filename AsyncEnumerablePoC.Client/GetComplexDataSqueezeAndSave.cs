@@ -10,7 +10,7 @@ namespace AsyncEnumerablePoC.Client;
 public class GetComplexDataSqueezeAndSave : HistoricalDataBenchmark
 {
     [Benchmark(Baseline = true), BenchmarkCategory("GetComplexDataSqueezeAndSave")]
-    public async Task GetDataTransformThreeAndSaveBatchesCollection()
+    public async Task GetComplexDataSqueezeAndSaveBatchesCollection()
     {
         int count = Samples / BatchSize;
         for (int i = 0; i < count; i++)
@@ -20,7 +20,8 @@ public class GetComplexDataSqueezeAndSave : HistoricalDataBenchmark
                 Url.Combine("HistoricalData", "GetComplexDataC-Batch"),
                 new GetDataBatchRequest { BatchCount = i, BatchSize = BatchSize });
 
-            IEnumerable<HistoricalTransformedData> squeezed = results.Select(d => new HistoricalTransformedData(
+            var mapped = results.Select(Map);
+            var squeezed = mapped.Select(d => new HistoricalTransformedData(
                 d.Timestamp, 
                 d.Value1 + d.Value2 - d.Value3 * d.Value4 + d.Value5));
 
@@ -29,24 +30,18 @@ public class GetComplexDataSqueezeAndSave : HistoricalDataBenchmark
     }
 
     [Benchmark, BenchmarkCategory("GetComplexDataSqueezeAndSave")]
-    public async Task GetDataTransformThreeAndSaveBatchesAsyncEnum()
+    public async Task GetComplexDataSqueezeAndSaveBatchesAsyncEnum()
     {
-        IAsyncEnumerable<HistoricalComplexData> results = AsyncEnumerableReceiver.RequestData<HistoricalComplexData>(
+        IAsyncEnumerable<HistoricalComplexData> results = AsyncEnumerableReceiver.PostData<HistoricalComplexData>(
             HttpClient,
-            Url.Combine("HistoricalData", "GetComplexDataAE"));
+            Url.Combine("HistoricalData", "GetComplexDataAE"),
+            new GetDataBatchRequest { BatchCount = 0, BatchSize = BatchSize });
 
-        var squeezed = Squeeze(results);
+        var mapped = results.Select(Map);
+        var squeezed = mapped.Select(d => new HistoricalTransformedData(
+            d.Timestamp, 
+            d.Value1 + d.Value2 - d.Value3 * d.Value4 + d.Value5));
 
         await BatchInsert(squeezed, MongoDataSet);
-    }
-
-    protected static async IAsyncEnumerable<HistoricalTransformedData> Squeeze(IAsyncEnumerable<HistoricalComplexData> dataSets)
-    {
-        await foreach (var d in dataSets)
-        {
-            yield return new HistoricalTransformedData(
-                d.Timestamp,
-                d.Value1 + d.Value2 - d.Value3 * d.Value4 + d.Value5);
-        }
     }
 }
