@@ -31,14 +31,18 @@ public class HistoricalDataController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalData>), StatusCodes.Status200OK)]
     public IAsyncEnumerable<object> GetHistoricalDataAsyncEnumerable()
     {
-        return _historicalDataProvider.GetHistoricalData().AsAsyncEnumerable();
+        return _historicalDataProvider.GetHistoricalData()
+            .OrderBy(h => h.Timestamp)
+            .AsAsyncEnumerable();
     }
 
     [HttpPost("GetDataAE")]
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalData>), StatusCodes.Status200OK)]
     public IAsyncEnumerable<object> GetPostHistoricalDataAsyncEnumerable([FromBody] GetDataBatchRequest request)
     {
-        return _historicalDataProvider.GetHistoricalData().AsAsyncEnumerable();
+        return _historicalDataProvider.GetHistoricalData()
+            .OrderBy(h => h.Timestamp)
+            .AsAsyncEnumerable();
     }
 
     [HttpGet("GetDataC")]
@@ -46,7 +50,9 @@ public class HistoricalDataController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalData>), StatusCodes.Status200OK)]
     public async Task<ActionResult> GetHistoricalDataCollection()
     {
-        return Ok(await _historicalDataProvider.GetHistoricalData().ToArrayAsync());
+        return Ok(await _historicalDataProvider.GetHistoricalData()
+            .OrderBy(h => h.Timestamp)
+            .ToArrayAsync());
     }
 
     [HttpPost("GetDataC-Batch")]
@@ -55,6 +61,7 @@ public class HistoricalDataController : ControllerBase
     public async Task<ActionResult> GetHistoricalDataCollectionBatch([FromBody] GetDataBatchRequest request)
     {
         return Ok(await _historicalDataProvider.GetHistoricalData()
+            .OrderBy(h => h.Timestamp)
             .Skip(request.BatchCount * request.BatchSize)
             .Take(request.BatchSize)
             .ToArrayAsync());
@@ -64,14 +71,18 @@ public class HistoricalDataController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
     public IAsyncEnumerable<object> GetHistoricalComplexDataAsyncEnumerable()
     {
-        return _historicalDataProvider.GetHistoricalComplexData().AsAsyncEnumerable();
+        return _historicalDataProvider.GetHistoricalComplexData()
+            .OrderBy(h => h.Timestamp)
+            .AsAsyncEnumerable();
     }
 
     [HttpPost("GetComplexDataAE")]
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
     public IAsyncEnumerable<object> GetPostHistoricalComplexDataAsyncEnumerable([FromBody] GetDataBatchRequest request)
     {
-        return _historicalDataProvider.GetHistoricalComplexData().AsAsyncEnumerable();
+        return _historicalDataProvider.GetHistoricalComplexData()
+            .OrderBy(h => h.Timestamp)
+            .AsAsyncEnumerable();
     }
 
     [HttpGet("GetComplexDataC")]
@@ -79,7 +90,9 @@ public class HistoricalDataController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyCollection<HistoricalComplexData>), StatusCodes.Status200OK)]
     public async Task<ActionResult> GetHistoricalComplexDataCollection()
     {
-        return Ok(await _historicalDataProvider.GetHistoricalComplexData().ToArrayAsync());
+        return Ok(await _historicalDataProvider.GetHistoricalComplexData()
+            .OrderBy(h => h.Timestamp)
+            .ToArrayAsync());
     }
 
     [HttpPost("GetComplexDataC-Batch")]
@@ -88,6 +101,7 @@ public class HistoricalDataController : ControllerBase
     public async Task<ActionResult> GetHistoricalComplexDataCollectionBatch([FromBody] GetDataBatchRequest request)
     {
         return Ok(await _historicalDataProvider.GetHistoricalComplexData()
+            .OrderBy(h => h.Timestamp)
             .Skip(request.BatchCount * request.BatchSize)
             .Take(request.BatchSize)
             .ToArrayAsync());
